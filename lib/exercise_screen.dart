@@ -14,6 +14,9 @@ class Exercise {
   final String day;
   final String image;
   int sequence;
+  bool isCompleted;
+  String? completionDate;
+  int? completionId;
 
   Exercise({
     required this.id,
@@ -24,9 +27,14 @@ class Exercise {
     required this.day,
     required this.sequence,
     required this.image,
+    this.isCompleted = false,
+    this.completionDate,
+    this.completionId,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
+    final hasCompletionId = json['completion_id'] != null;
+    
     return Exercise(
       id: json['userexercise_id'],
       name: json['name'] ?? 'Unnamed Exercise',
@@ -36,6 +44,9 @@ class Exercise {
       day: json['day'].toString() ?? 'Unknown Day',
       sequence: json['sequence'] ?? 0,
       image: json['image'] ?? '',
+      isCompleted: hasCompletionId,
+      completionDate: json['completion_date'],
+      completionId: json['completion_id'],
     );
   }
 }
@@ -61,13 +72,16 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     });
 
     try {
-      // Retrieve user_id from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final int? userId = prefs.getInt('user_id');
       final String day = ModalRoute.of(context)!.settings.arguments as String;
 
+      print('🔍 Fetching exercises:');
+      print('User ID: $userId');
+      print('Day: $day');
+
       if (userId == null) {
-        print('Error: User ID not found in SharedPreferences');
+        print('❌ Error: User ID not found in SharedPreferences');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User not logged in')),
         );
@@ -77,47 +91,113 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         return;
       }
 
-      // Make API call using user_id
-      final response = await http.get(
-        Uri.parse('https://dasroor.com/lalavqa3a/panel/api/fetch_exercises.php?userid=$userId&day=$day'),
-      );
+      final url = 'https://dasroor.com/lalavqa3a/panel/api/fetch_exercises.php?userid=$userId&day=$day';
+      print('URL: $url');
+
+      final response = await http.get(Uri.parse(url));
+
+      print('📥 Received response:');
+      print('Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        print('Response: ${response.body}'); // Debug
         final List<dynamic> jsonResponse = json.decode(response.body);
+        print('✅ Successfully parsed ${jsonResponse.length} exercises');
+        
+        for (var exerciseJson in jsonResponse) {
+          print('\n📋 Exercise: ${exerciseJson['name']}');
+          print('Completion ID: ${exerciseJson['completion_id']}');
+          print('Is Completed: ${exerciseJson['completion_id'] != null}');
+          if (exerciseJson['completion_id'] != null) {
+            print('Completion Date: ${exerciseJson['completion_date']}');
+          }
+        }
         
         setState(() {
           exercises = jsonResponse.map((json) => Exercise.fromJson(json)).toList();
           isLoading = false;
         });
       } else {
-        print('Error: ${response.statusCode}, Body: ${response.body}');
+        print('❌ HTTP Error: ${response.statusCode}');
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      print('Error: $e');
+      print('❌ Exception occurred: $e');
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  Future<void> updateSequence() async {
-    final updates = exercises
-        .map((e) => {'id': e.id, 'sequence': e.sequence})
-        .toList();
+  Future<void> markExerciseComplete(int exerciseId) async {
+    try {
+      print('🎯 Starting exercise completion process');
+      print('Exercise ID: $exerciseId');
+      
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+      
+      print('👤 User ID: $userId');
 
-    final response = await http.post(
-      Uri.parse('https://dasroor.com/lalavqa3a/panel/api/update_exercise_sequence.php'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(updates),
-    );
+      final requestBody = {
+        'user_id': userId,
+        'userexercise_id': exerciseId,
+      };
+      
+      print('🚀 Sending completion request:');
+      print('URL: https://dasroor.com/lalavqa3a/panel/api/mark_exercise_complete.php');
+      print('Headers: ${{'Content-Type': 'application/json'}}');
+      print('Body: ${json.encode(requestBody)}');
 
-    if (response.statusCode != 200) {
+      final response = await http.post(
+        Uri.parse('https://dasroor.com/lalavqa3a/panel/api/mark_exercise_complete.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(requestBody),
+      );
+
+      print('\n📥 Received completion response:');
+      print('Status code: ${response.statusCode}');
+      print('Raw response: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Parsed response data: $data');
+        
+        if (data['status'] == 'success') {
+          print('✅ Exercise marked as complete successfully');
+          
+          // Update the exercise in the list immediately
+          setState(() {
+            final index = exercises.indexWhere((e) => e.id == exerciseId);
+            if (index != -1) {
+              exercises[index].isCompleted = true;
+              exercises[index].completionDate = DateTime.now().toString().split('.')[0];
+              exercises[index].completionId = data['completion_id'];
+              print('Updated exercise status:');
+              print('- Completed: ${exercises[index].isCompleted}');
+              print('- Completion Date: ${exercises[index].completionDate}');
+              print('- Completion ID: ${exercises[index].completionId}');
+            }
+          });
+          
+        } else {
+          print('❌ API returned error status');
+          print('Error message: ${data['message']}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Failed to mark exercise as complete')),
+          );
+        }
+      } else {
+        print('❌ HTTP Error ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to mark exercise as complete');
+      }
+    } catch (e) {
+      print('❌ Exception during completion: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update sequence')),
+        const SnackBar(content: Text('Error marking exercise as complete. Please try again.')),
       );
     }
   }
@@ -301,22 +381,39 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           exercise.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(
-          'Sets: ${exercise.sets} • Reps: ${exercise.reps}',
-          style: const TextStyle(color: Colors.grey),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sets: ${exercise.sets} • Reps: ${exercise.reps}',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            if (exercise.isCompleted && exercise.completionDate != null)
+              Text(
+                'Completed on: ${exercise.completionDate}',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+          ],
         ),
-        trailing: exercise.sequence == exercises.length
+        trailing: exercise.isCompleted
             ? const Icon(Icons.check_circle, color: Colors.green)
-            : Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+            : ElevatedButton(
+                onPressed: () => markExerciseComplete(exercise.id),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple.withOpacity(0.1),
+                  foregroundColor: Colors.purple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 0,
                 ),
                 child: const Text(
-                  'PENDING',
+                  'COMPLETE',
                   style: TextStyle(
-                    color: Colors.purple,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),

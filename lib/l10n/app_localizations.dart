@@ -24,6 +24,7 @@ class AppLocalizations {
       'logoutConfirmation': 'Are you sure you want to logout?',
       'cancel': 'Cancel',
       'yes': 'Yes',
+      'todayexercises': 'Today exercises',  
     },
     'ar': {
       'hello': 'مرحباً،',
@@ -38,20 +39,22 @@ class AppLocalizations {
       'logoutConfirmation': 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
       'cancel': 'إلغاء',
       'yes': 'نعم',
+      'todayexercises': 'تمارين اليوم',
     },
     'fa': {
-      'hello': 'سلام،',
-      'weekly_stats': 'آمار هفتگی',
+      'hello': 'سڵاو',
+      'weekly_stats': 'ستاتس',
       'kcal_burnt': 'کالری سوزانده شده',
-      'total_time': 'زمان کل',
-      'total_crusts': 'مجموع امتیازات',
-      'lets_try': 'بیا امتحان کنیم',
-      'skip': 'رد کردن',
+      'total_time': 'كات',
+      'total_crusts': 'پۆینت',
+      'lets_try': 'با دەست پێ بكەین',
+      'skip': 'لێرە بگەڕێ',
       'try_celebrity': 'برنامه‌های تمرینی سلبریتی‌ها را امتحان کنید!',
-      'logout': 'خروج',
-      'logoutConfirmation': 'آیا مطمئن هستید که می‌خواهید خارج شوید؟',
-      'cancel': 'لغو',
-      'yes': 'بله',
+      'logout': 'چوونەدەرەوە',
+      'logoutConfirmation': 'دڵنیابوونەوە؟',
+      'cancel': 'پاشگەزبوونەوە',
+      'yes': 'بەڵێ',
+      'todayexercises': 'یاریەكانی ئەمڕۆ',
     },
   };
 
@@ -69,6 +72,7 @@ class AppLocalizations {
   String get logoutConfirmation => _localizedValues[locale.languageCode]!['logoutConfirmation']!;
   String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
   String get yes => _localizedValues[locale.languageCode]!['yes']!;
+  String get todayexercises => _localizedValues[locale.languageCode]!['todayexercises']!;
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

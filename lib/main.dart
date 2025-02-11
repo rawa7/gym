@@ -7,6 +7,11 @@ import 'home_screen.dart';
 import 'exercise_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:gym/providers/locale_provider.dart';
+import 'package:gym/gallery_screen.dart';
+import 'package:gym/trainers_screen.dart';
+import 'package:gym/profile_screen.dart';
+import 'package:gym/fooddays_screen.dart';
+import 'package:gym/food.dart';
 
 void main() {
   runApp(
@@ -38,6 +43,14 @@ class MyApp extends StatelessWidget {
             '/home': (context) => HomeScreen(),
             '/days': (context) => DaysScreen(),
             '/exercises': (context) => ExerciseScreen(),
+            '/food': (context) => FoodDaysScreen(),
+            '/foods': (context) {
+              final day = ModalRoute.of(context)!.settings.arguments as String;
+              return FoodScreen(day: day);
+            },
+            '/gallery': (context) => GalleryScreen(),
+            '/trainers': (context) => TrainersScreen(),
+            '/profile': (context) => ProfileScreen(),
           },
           supportedLocales: const [
             Locale('en'),

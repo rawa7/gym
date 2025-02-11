@@ -3,22 +3,22 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DaysScreen extends StatefulWidget {
+class FoodDaysScreen extends StatefulWidget {
   @override
-  _DaysScreenState createState() => _DaysScreenState();
+  _FoodDaysScreenState createState() => _FoodDaysScreenState();
 }
 
-class _DaysScreenState extends State<DaysScreen> {
+class _FoodDaysScreenState extends State<FoodDaysScreen> {
   bool isLoading = false;
-  List<Map<String, dynamic>> days = [];
+  List<Map<String, dynamic>> foodDays = [];
 
   @override
   void initState() {
     super.initState();
-    fetchDays();
+    fetchFoodDays();
   }
 
-  Future<void> fetchDays() async {
+  Future<void> fetchFoodDays() async {
     setState(() {
       isLoading = true;
     });
@@ -38,13 +38,13 @@ class _DaysScreenState extends State<DaysScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('https://dasroor.com/lalavqa3a/panel/api/fetch_days.php?userid=$userId'),
+        Uri.parse('https://dasroor.com/lalavqa3a/panel/api/fetch_food_days.php?userid=$userId'),
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          days = List<Map<String, dynamic>>.from(data);
+          foodDays = List<Map<String, dynamic>>.from(data);
           isLoading = false;
         });
       } else {
@@ -65,7 +65,7 @@ class _DaysScreenState extends State<DaysScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Workouts', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text('Meal Plans', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -74,7 +74,7 @@ class _DaysScreenState extends State<DaysScreen> {
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: ListView.builder(
-                itemCount: days.length,
+                itemCount: foodDays.length,
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -82,18 +82,18 @@ class _DaysScreenState extends State<DaysScreen> {
                       onTap: () {
                         Navigator.pushNamed(
                           context,
-                          '/exercises',
-                          arguments: days[index]['day'].toString()
+                          '/foods',
+                          arguments: foodDays[index]['day'].toString()
                         );
                       },
                       child: Container(
                         height: 140,
                         decoration: BoxDecoration(
                           color: [
-                            Colors.blue[50],
-                            Colors.purple[100],
-                            Colors.teal[100],
-                            Colors.pink[50],
+                            Colors.green[50],
+                            Colors.orange[100],
+                            Colors.red[50],
+                            Colors.yellow[100],
                           ][index % 4],
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -107,7 +107,7 @@ class _DaysScreenState extends State<DaysScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Day ${days[index]['day']}',
+                                      'Day ${foodDays[index]['day']}',
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -115,14 +115,14 @@ class _DaysScreenState extends State<DaysScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '15 Exercises',
+                                      '${foodDays[index]['meals_count'] ?? 3} Meals',
                                       style: TextStyle(
                                         color: Colors.grey[600],
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '45 Minutes',
+                                      '${foodDays[index]['total_calories'] ?? 2000} Calories',
                                       style: TextStyle(
                                         color: Colors.grey[600],
                                       ),
@@ -137,7 +137,7 @@ class _DaysScreenState extends State<DaysScreen> {
                                 bottomRight: Radius.circular(12),
                               ),
                               child: Image.network(
-                                'https://dasroor.com/lalavqa3a/images/${days[index]['dayimage']}',
+                                'https://dasroor.com/lalavqa3a/images/${foodDays[index]['dayimage']}',
                                 width: 120,
                                 height: 140,
                                 fit: BoxFit.cover,
@@ -163,4 +163,4 @@ class _DaysScreenState extends State<DaysScreen> {
             ),
     );
   }
-}
+} 

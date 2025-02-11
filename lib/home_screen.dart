@@ -3,6 +3,8 @@ import 'package:gym/bottom_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gym/l10n/app_localizations.dart';
 import 'package:gym/language_selector.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,11 +14,18 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? username;
+  Map<String, int> statistics = {
+    'exercises_today': 0,
+    'training_days_this_month': 0,
+    'total_points_this_month': 0,
+  };
+  bool isLoadingStats = true;
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
+    _fetchStatistics();
   }
 
   Future<void> _loadUsername() async {
@@ -24,6 +33,72 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       username = prefs.getString('username') ?? 'User';
     });
+  }
+
+  Future<void> _fetchStatistics() async {
+    setState(() {
+      isLoadingStats = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId == null) {
+        print('❌ User ID not found');
+        return;
+      }
+
+      print('\n🔍 Fetching statistics:');
+      print('URL: https://dasroor.com/lalavqa3a/panel/api/get_statistics.php');
+      print('User ID: $userId');
+      
+      final requestBody = json.encode({'user_id': userId});
+      print('Request Body: $requestBody');
+      print('Headers: ${{'Content-Type': 'application/json'}}');
+
+      final response = await http.post(
+        Uri.parse('https://dasroor.com/lalavqa3a/panel/api/home.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: requestBody,
+      );
+
+      print('\n📥 Received response:');
+      print('Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('\n✅ Parsed response data:');
+        print('Status: ${data['status']}');
+        if (data['status'] == 'success') {
+          print('Statistics:');
+          print('- Exercises today: ${data['data']['exercises_today']}');
+          print('- Training days this month: ${data['data']['training_days_this_month']}');
+          print('- Total points this month: ${data['data']['total_points_this_month']}');
+          
+          setState(() {
+            statistics = {
+              'exercises_today': data['data']['exercises_today'],
+              'training_days_this_month': data['data']['training_days_this_month'],
+              'total_points_this_month': data['data']['total_points_this_month'],
+            };
+          });
+        } else {
+          print('❌ API returned error status');
+          print('Error message: ${data['message']}');
+        }
+      } else {
+        print('❌ HTTP Error ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('❌ Error fetching statistics: $e');
+    } finally {
+      setState(() {
+        isLoadingStats = false;
+      });
+    }
   }
 
   Future<int> getUserId() async {
@@ -90,9 +165,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       LanguageSelector(),
-                      IconButton(
-                        icon: const Icon(Icons.logout),
-                        onPressed: () => logout(context),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.photo_library),
+                            onPressed: () => Navigator.pushNamed(context, '/gallery'),
+                            tooltip: 'Gallery',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.logout),
+                            onPressed: () => logout(context),
+                            tooltip: 'Logout',
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -138,38 +223,44 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/days'),
-                          child: _StatCard(
-                            title: '5',
-                            subtitle: localizations.exercises,
-                            icon: Icons.fitness_center,
-                            color: Colors.orange[100]!,
-                          ),
+                  isLoadingStats
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.pushNamed(context, '/days'),
+                                    child: _StatCard(
+                                      title: statistics['exercises_today'].toString(),
+                                      subtitle: localizations.todayexercises,
+                                      icon: Icons.fitness_center,
+                                      color: Colors.orange[100]!,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: _StatCard(
+                                    title: statistics['training_days_this_month'].toString(),
+                                    subtitle: localizations.daysThisMonth,
+                                    icon: Icons.calendar_month,
+                                    color: Colors.green[100]!,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            _StatCard(
+                              title: statistics['total_points_this_month'].toString(),
+                              subtitle: localizations.totalCrusts,
+                              icon: Icons.star,
+                              color: Colors.blue[100]!,
+                              fullWidth: true,
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: _StatCard(
-                          title: '12',
-                          subtitle: localizations.daysThisMonth,
-                          icon: Icons.calendar_month,
-                          color: Colors.green[100]!,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  _StatCard(
-                    title: '107',
-                    subtitle: localizations.totalCrusts,
-                    icon: Icons.star,
-                    color: Colors.blue[100]!,
-                    fullWidth: true,
-                  ),
                 ],
               ),
             ),

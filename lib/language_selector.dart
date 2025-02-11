@@ -21,7 +21,7 @@ class LanguageSelector extends StatelessWidget {
         ),
         PopupMenuItem<Locale>(
           value: Locale('fa'),
-          child: Text('فارسی'),
+          child: Text('كوردی'),
         ),
       ],
     );
