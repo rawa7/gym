@@ -5,6 +5,21 @@ import 'package:gym/l10n/app_localizations.dart';
 import 'package:gym/language_selector.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
+
+class CarouselItem {
+  final String imageUrl;
+
+  CarouselItem({
+    required this.imageUrl,
+  });
+
+  factory CarouselItem.fromString(String url) {
+    return CarouselItem(
+      imageUrl: url,
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -14,6 +29,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? username;
+  List<CarouselItem> carouselItems = [];
+  bool isLoadingCarousel = true;
   Map<String, int> statistics = {
     'exercises_today': 0,
     'training_days_this_month': 0,
@@ -26,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadUsername();
     _fetchStatistics();
+    _fetchCarouselData();
   }
 
   Future<void> _loadUsername() async {
@@ -97,6 +115,50 @@ class _HomeScreenState extends State<HomeScreen> {
     } finally {
       setState(() {
         isLoadingStats = false;
+      });
+    }
+  }
+
+  Future<void> _fetchCarouselData() async {
+    setState(() {
+      isLoadingCarousel = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId == null) {
+        print('❌ User ID not found');
+        return;
+      }
+
+      print('\n🔍 Fetching carousel data:');
+      final response = await http.post(
+        Uri.parse('https://dasroor.com/lalavqa3a/panel/api/get_carousel.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'user_id': userId}),
+      );
+
+      print('\n📥 Received carousel response:');
+      print('Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          setState(() {
+            carouselItems = (data['data'] as List)
+                .map((url) => CarouselItem.fromString(url.toString()))
+                .toList();
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ Error fetching carousel data: $e');
+    } finally {
+      setState(() {
+        isLoadingCarousel = false;
       });
     }
   }
@@ -202,19 +264,61 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/gym_banner.png'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                  isLoadingCarousel
+                      ? Container(
+                          height: 200,
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      : carouselItems.isEmpty
+                          ? Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                image: DecorationImage(
+                                  image: AssetImage('assets/images/gym_banner.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          : FlutterCarousel(
+                              options: CarouselOptions(
+                                height: 200,
+                                viewportFraction: 1.0,
+                                showIndicator: true,
+                                slideIndicator: CircularSlideIndicator(
+                                  slideIndicatorOptions: SlideIndicatorOptions(
+                                    currentIndicatorColor: Colors.white,
+                                    indicatorBackgroundColor: Colors.grey,
+                                    indicatorRadius: 4,
+                                    itemSpacing: 12,
+                                  ),
+                                ),
+                                autoPlay: true,
+                                autoPlayInterval: const Duration(seconds: 3),
+                                enableInfiniteScroll: true,
+                                autoPlayCurve: Curves.fastOutSlowIn,
+                                autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                              ),
+                              items: carouselItems.map((item) {
+                                return Builder(
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(15),
+                                        image: DecorationImage(
+                                          image: NetworkImage(item.imageUrl),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }).toList(),
+                            ),
                   const SizedBox(height: 20),
-
                   Text(
                     localizations.weeklyStats,
                     style: TextStyle(

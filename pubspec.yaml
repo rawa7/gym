@@ -38,10 +38,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   http: ^1.2.2 # For making HTTP requests
-  flutter_slidable: ^0.6.0 # For drag-and-drop functionality
   shared_preferences: ^2.0.15
-  flutter_svg: ^2.0.9  # Use the latest version
   provider: ^6.0.5
+  flutter_carousel_widget: ^2.2.0
 
 dev_dependencies:
   flutter_test:
