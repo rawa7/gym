@@ -24,7 +24,26 @@ class AppLocalizations {
       'logoutConfirmation': 'Are you sure you want to logout?',
       'cancel': 'Cancel',
       'yes': 'Yes',
-      'todayexercises': 'Today exercises',  
+      'todayexercises': 'Today exercises',
+      'avenueGym': 'AVENUE GYM',
+      'userId': 'User ID',
+      'enterPassword': 'Enter Your Password',
+      'rememberMe': 'Remember Me',
+      'loginButton': 'Login',
+      'loginAsGuest': 'Login as Guest',
+      'workouts': 'Workouts',
+      'day': 'Day',
+      'exercises': 'Exercises',
+      'minutes': 'Minutes',
+      'sets': 'Sets',
+      'reps': 'Reps',
+      'complete': 'COMPLETE',
+      'completed_on': 'Completed on',
+      'workout_summary': 'Workout Summary',
+      'total_exercises': 'Total exercises',
+      'estimated_time': 'Estimated time',
+      'energy_burn': 'Energy you\'ll burn',
+      'calories': 'calories',
     },
     'ar': {
       'hello': 'مرحباً،',
@@ -40,6 +59,25 @@ class AppLocalizations {
       'cancel': 'إلغاء',
       'yes': 'نعم',
       'todayexercises': 'تمارين اليوم',
+      'avenueGym': 'أفينيو جيم',
+      'userId': 'معرف المستخدم',
+      'enterPassword': 'أدخل كلمة المرور',
+      'rememberMe': 'تذكرني',
+      'loginButton': 'تسجيل الدخول',
+      'loginAsGuest': 'الدخول كضيف',
+      'workouts': 'التمارين',
+      'day': 'اليوم',
+      'exercises': 'التمارين',
+      'minutes': 'دقائق',
+      'sets': 'مجموعات',
+      'reps': 'تكرارات',
+      'complete': 'إكمال',
+      'completed_on': 'تم الإكمال في',
+      'workout_summary': 'ملخص التمرين',
+      'total_exercises': 'مجموع التمارين',
+      'estimated_time': 'الوقت المقدر',
+      'energy_burn': 'السعرات الحرارية المحروقة',
+      'calories': 'سعرة حرارية',
     },
     'fa': {
       'hello': 'سڵاو',
@@ -55,6 +93,25 @@ class AppLocalizations {
       'cancel': 'پاشگەزبوونەوە',
       'yes': 'بەڵێ',
       'todayexercises': 'یاریەكانی ئەمڕۆ',
+      'avenueGym': 'ئەڤینیو جیم',
+      'userId': 'ناسنامەی بەکارهێنەر',
+      'enterPassword': 'وشەی نهێنی بنووسە',
+      'rememberMe': 'بمهێڵەوە',
+      'loginButton': 'چوونەژوورەوە',
+      'loginAsGuest': 'وەک میوان بچۆژوورەوە',
+      'workouts': 'ڕاهێنانەکان',
+      'day': 'ڕۆژ',
+      'exercises': 'ڕاهێنانەکان',
+      'minutes': 'خولەک',
+      'sets': 'سێتەکان',
+      'reps': 'دووبارەکردنەوەکان',
+      'complete': 'تەواوکردن',
+      'completed_on': 'تەواوکرا لە',
+      'workout_summary': 'کورتەی ڕاهێنان',
+      'total_exercises': 'کۆی ڕاهێنانەکان',
+      'estimated_time': 'کاتی خەمڵێنراو',
+      'energy_burn': 'وزەی سووتاو',
+      'calories': 'کالۆری',
     },
   };
 
@@ -73,6 +130,24 @@ class AppLocalizations {
   String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
   String get yes => _localizedValues[locale.languageCode]!['yes']!;
   String get todayexercises => _localizedValues[locale.languageCode]!['todayexercises']!;
+  String get avenueGym => _localizedValues[locale.languageCode]!['avenueGym']!;
+  String get userId => _localizedValues[locale.languageCode]!['userId']!;
+  String get enterPassword => _localizedValues[locale.languageCode]!['enterPassword']!;
+  String get rememberMe => _localizedValues[locale.languageCode]!['rememberMe']!;
+  String get loginButton => _localizedValues[locale.languageCode]!['loginButton']!;
+  String get loginAsGuest => _localizedValues[locale.languageCode]!['loginAsGuest']!;
+  String get workouts => _localizedValues[locale.languageCode]!['workouts']!;
+  String get day => _localizedValues[locale.languageCode]!['day']!;
+  String get minutes => _localizedValues[locale.languageCode]!['minutes']!;
+  String get sets => _localizedValues[locale.languageCode]!['sets']!;
+  String get reps => _localizedValues[locale.languageCode]!['reps']!;
+  String get complete => _localizedValues[locale.languageCode]!['complete']!;
+  String get completedOn => _localizedValues[locale.languageCode]!['completed_on']!;
+  String get workoutSummary => _localizedValues[locale.languageCode]!['workout_summary']!;
+  String get totalExercises => _localizedValues[locale.languageCode]!['total_exercises']!;
+  String get estimatedTime => _localizedValues[locale.languageCode]!['estimated_time']!;
+  String get energyBurn => _localizedValues[locale.languageCode]!['energy_burn']!;
+  String get calories => _localizedValues[locale.languageCode]!['calories']!;
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

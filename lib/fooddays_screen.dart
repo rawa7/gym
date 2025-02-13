@@ -137,7 +137,7 @@ class _FoodDaysScreenState extends State<FoodDaysScreen> {
                                 bottomRight: Radius.circular(12),
                               ),
                               child: Image.network(
-                                'https://dasroor.com/lalavqa3a/images/${foodDays[index]['dayimage']}',
+                                '${foodDays[index]['dayimage']}',
                                 width: 120,
                                 height: 140,
                                 fit: BoxFit.cover,

@@ -75,9 +75,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (duration == null) return 'Subscription ended';
     if (duration.isNegative) return 'Subscription ended';
     
-    return '${duration.inDays} days, '
-        '${duration.inHours.remainder(24)} hours, '
-        '${duration.inMinutes.remainder(60)} minutes';
+    return '${duration.inDays} days, ';
+        
   }
 
   Future<void> logout(BuildContext context) async {
